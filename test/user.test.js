@@ -45,7 +45,7 @@ describe("User routes", () => {
         .post("/api/users/signup")
         .send(user)
         .end((error, response) => {
-          response.should.have.status(500);
+          response.should.have.status(200);
           response.body.should.be.an("object");
           Object.keys(response.body).length.should.be.eq(2);
           response.body.should.have.property("success").eq(false);
@@ -56,9 +56,31 @@ describe("User routes", () => {
         });
     });
 
-    it("It should give all validation errors", (done) => {
+    it("It should give an error 'Invalid email address'", (done) => {
       const user = {
         email: "test@test",
+        password: "Password.123",
+        confirmPassword: "Password.123",
+      };
+      chai
+        .request(server)
+        .post("/api/users/signup")
+        .send(user)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("object");
+          Object.keys(response.body).length.should.be.eq(2);
+          response.body.should.have.property("success").eq(false);
+          response.body.should.have
+            .property("message")
+            .eq("Invalid email adddress");
+          done();
+        });
+    });
+
+    it("It should give an error 'Password too weak'", (done) => {
+      const user = {
+        email: "test@test.com",
         password: "Password",
         confirmPassword: "Password.123",
       };
@@ -67,12 +89,33 @@ describe("User routes", () => {
         .post("/api/users/signup")
         .send(user)
         .end((error, response) => {
-          response.should.have.status(500);
+          response.should.have.status(200);
           response.body.should.be.an("object");
           Object.keys(response.body).length.should.be.eq(2);
           response.body.should.have.property("success").eq(false);
-          response.body.should.have.property("message");
-          response.body.message.length.should.be.eq(3);
+          response.body.should.have.property("message").eq("Password too weak");
+          done();
+        });
+    });
+
+    it("It should give an error 'Passwords must match'", (done) => {
+      const user = {
+        email: "test@test.com",
+        password: "Password.123",
+        confirmPassword: "Password",
+      };
+      chai
+        .request(server)
+        .post("/api/users/signup")
+        .send(user)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("object");
+          Object.keys(response.body).length.should.be.eq(2);
+          response.body.should.have.property("success").eq(false);
+          response.body.should.have
+            .property("message")
+            .eq("Passwords must match");
           done();
         });
     });
@@ -108,7 +151,7 @@ describe("User routes", () => {
         .post("/api/users/login")
         .send(user)
         .end((error, response) => {
-          response.should.have.status(500);
+          response.should.have.status(200);
           response.body.should.be.an("object");
           Object.keys(response.body).length.should.be.eq(2);
           response.body.should.have.property("success").eq(false);
@@ -129,7 +172,7 @@ describe("User routes", () => {
         .post("/api/users/login")
         .send(user)
         .end((error, response) => {
-          response.should.have.status(500);
+          response.should.have.status(200);
           response.body.should.be.an("object");
           Object.keys(response.body).length.should.be.eq(2);
           response.body.should.have.property("success").eq(false);

@@ -7,13 +7,13 @@ module.exports = {
   createUser: (req, res) => {
     const body = req.body;
     const errors = validateNewUserData(body);
-    if (errors.length > 0)
-      return res.status(500).json({ success: false, message: errors });
+    // send only first error
+    if (errors.length > 0) return res.json({ success: false, message: errors[0] });
     body.password = hashSync(body.password);
     createUser(body, (error, results) => {
       if (error) {
         console.error(error);
-        return res.status(500).json({
+        return res.json({
           success: false,
           message:
             error.code === "ER_DUP_ENTRY"
@@ -21,7 +21,7 @@ module.exports = {
               : "Datebase connection error",
         });
       }
-      return res.status(200).json({
+      return res.json({
         success: true,
         data: results,
         message: "User created successfully",
@@ -33,26 +33,25 @@ module.exports = {
     getUserByEmail(body.email, (error, results) => {
       if (error) {
         console.error(error);
-        return res
-          .status(500)
-          .json({ success: false, message: "Datebase connection error" });
+        return res.json({
+          success: false,
+          message: "Datebase connection error",
+        });
       }
       if (!results)
-        return res.status(500).json({
+        return res.json({
           success: false,
           message: "User with that email not found",
         });
       const passwordIsValid = compareSync(body.password, results.password);
       if (!passwordIsValid)
-        return res
-          .status(500)
-          .json({ success: false, message: "Wrong password" });
+        return res.json({ success: false, message: "Wrong password" });
       // Make password = null to not include the password in jsontoken
       results.password = null;
       const jsontoken = sign({ user: results }, process.env.JWT_KEY, {
         expiresIn: "1h",
       });
-      return res.status(200).json({ success: true, data: jsontoken });
+      return res.json({ success: true, data: jsontoken });
     });
   },
 };
