@@ -34,9 +34,6 @@ module.exports = {
           message: "Something went wrong",
         });
       }
-      if (!results) {
-        return res.json({ success: false, message: "Tasks not found" });
-      }
       return res.json({ success: true, data: results });
     });
   },
@@ -50,13 +47,11 @@ module.exports = {
           message: "Something went wrong",
         });
       }
-      console.log(results);
-      if (!results)
+      if (results.affectedRows === 0)
         return res.json({ success: false, message: "Task not found" });
       return res.json({
         success: true,
         message: "Task deleted successfully",
-        data: results,
       });
     });
   },
