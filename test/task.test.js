@@ -8,6 +8,22 @@ chai.use(chaiHttp);
 
 describe("Task routes", () => {
   let insertedId;
+  let accessToken;
+  before((done) => {
+    // login user to get access token
+    const user = {
+      email: "test@test.com",
+      password: "Password.123",
+    };
+    chai
+      .request(server)
+      .post("/api/users/login")
+      .send(user)
+      .end((error, response) => {
+        accessToken = response.body.data;
+        done();
+      });
+  });
   describe("POST api/users/", () => {
     it("It should create new task", (done) => {
       const task = {
@@ -18,6 +34,7 @@ describe("Task routes", () => {
       chai
         .request(server)
         .post("/api/tasks/")
+        .set("Authorization", `Bearer ${accessToken}`)
         .send(task)
         .end((error, response) => {
           insertedId = response.body.data.insertId;
@@ -33,12 +50,12 @@ describe("Task routes", () => {
         });
     });
   });
-  describe("GET api/users/:id", () => {
+  describe("GET api/users/", () => {
     it("It should get user's tasks", (done) => {
       chai
         .request(server)
-        // test@test.com user have id 23
-        .get("/api/tasks/23")
+        .get("/api/tasks/")
+        .set("Authorization", `Bearer ${accessToken}`)
         .send()
         .end((error, response) => {
           response.should.have.status(200);
@@ -56,6 +73,7 @@ describe("Task routes", () => {
       chai
         .request(server)
         .delete("/api/tasks/")
+        .set("Authorization", `Bearer ${accessToken}`)
         .send(body)
         .end((error, response) => {
           response.should.have.status(200);
@@ -74,6 +92,7 @@ describe("Task routes", () => {
       chai
         .request(server)
         .delete("/api/tasks/")
+        .set("Authorization", `Bearer ${accessToken}`)
         .send(body)
         .end((error, response) => {
           response.should.have.status(200);
@@ -81,6 +100,38 @@ describe("Task routes", () => {
           Object.keys(response.body).length.should.be.eq(2);
           response.body.should.have.property("success").eq(false);
           response.body.should.have.property("message").eq("Task not found");
+          done();
+        });
+    });
+    it("It should give an error 'Access denied - unauthorized user'", (done) => {
+      chai
+        .request(server)
+        .get("/api/tasks/")
+        .send()
+        .end((error, response) => {
+          console.log(response.body);
+          response.should.have.status(200);
+          response.body.should.be.an("object");
+          Object.keys(response.body).length.should.be.eq(2);
+          response.body.should.have.property("success").eq(false);
+          response.body.should.have
+            .property("message")
+            .eq("Access denied - unauthorized user");
+          done();
+        });
+    });
+    it("It should give an error 'Invalid token'", (done) => {
+      chai
+        .request(server)
+        .get("/api/tasks/")
+        .send()
+        .set("Authorization", `Bearer token`)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("object");
+          Object.keys(response.body).length.should.be.eq(2);
+          response.body.should.have.property("success").eq(false);
+          response.body.should.have.property("message").eq("Invalid token");
           done();
         });
     });

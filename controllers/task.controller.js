@@ -25,7 +25,7 @@ module.exports = {
     });
   },
   getAllTasksForUser: (req, res) => {
-    const userId = req.params.userId;
+    const userId = req.decodedToken.user.id;
     getAllTasksForUser(userId, (error, results) => {
       if (error) {
         console.error(error);

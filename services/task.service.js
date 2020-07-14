@@ -13,7 +13,7 @@ module.exports = {
   },
   getAllTasksForUser: (userId, callBack) => {
     pool.query(
-      `SELECT * FROM task WHERE user_id = ?`,
+      `SELECT body, created_at, group_id FROM task WHERE user_id = ?`,
       [userId],
       (error, results) => {
         if (error) return callBack(error);
