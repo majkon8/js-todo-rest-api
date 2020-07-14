@@ -8,7 +8,8 @@ module.exports = {
     const body = req.body;
     const errors = validateNewUserData(body);
     // send only first error
-    if (errors.length > 0) return res.json({ success: false, message: errors[0] });
+    if (errors.length > 0)
+      return res.json({ success: false, message: errors[0] });
     body.password = hashSync(body.password);
     createUser(body, (error, results) => {
       if (error) {
@@ -18,7 +19,7 @@ module.exports = {
           message:
             error.code === "ER_DUP_ENTRY"
               ? "Email already registered"
-              : "Datebase connection error",
+              : "Something went wrong",
         });
       }
       return res.json({
@@ -35,7 +36,7 @@ module.exports = {
         console.error(error);
         return res.json({
           success: false,
-          message: "Datebase connection error",
+          message: "Something went wrong",
         });
       }
       if (!results)
