@@ -13,7 +13,7 @@ module.exports = {
   },
   getAllGroupsForUser: (userId, callBack) => {
     pool.query(
-      `SELECT name FROM tasks_group WHERE user_id = ?`,
+      `SELECT id, name FROM tasks_group WHERE user_id = ?`,
       [userId],
       (error, results) => {
         if (error) return callBack(error);

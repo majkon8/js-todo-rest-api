@@ -4,7 +4,7 @@ module.exports = {
   createTask: (data, callBack) => {
     pool.query(
       `INSERT INTO task(user_id, body, created_at, group_id) values(?, ?, ?, ?)`,
-      [data.userId, data.body, new Date(), data.group_id],
+      [data.userId, data.body, new Date(), data.groupId],
       (error, results) => {
         if (error) return callBack(error);
         return callBack(null, results);
