@@ -25,7 +25,7 @@ describe("Task routes", () => {
       });
   });
   describe("POST api/tasks/", () => {
-    it("It should create new task", (done) => {
+    it("It should create a new task", (done) => {
       const task = {
         body: "Test task",
       };
@@ -53,7 +53,7 @@ describe("Task routes", () => {
     });
   });
   describe("GET api/tasks/", () => {
-    it("It should get user's tasks", (done) => {
+    it("It should get user tasks", (done) => {
       chai
         .request(server)
         .get("/api/tasks/")

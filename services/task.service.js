@@ -23,7 +23,7 @@ module.exports = {
   },
   deleteTask: (data, callBack) => {
     pool.query(
-      `DELETE FROM task WHERE id = ?`,
+      `DELETE FROM task WHERE id = ? AND user_id = ?`,
       [data.taskId, data.userId],
       (error, results) => {
         if (error) return callBack(error);

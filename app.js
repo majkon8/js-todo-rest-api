@@ -3,6 +3,7 @@ const express = require("express");
 const app = express();
 const userRouter = require("./routes/user.router");
 const taskRouter = require("./routes/task.router");
+const groupRouter = require("./routes/group.router");
 
 app.use(express.json());
 
@@ -13,5 +14,6 @@ app.listen(port, () => {
 
 app.use("/api/users", userRouter);
 app.use("/api/tasks", taskRouter);
+app.use("/api/groups", groupRouter);
 
 module.exports = app;
