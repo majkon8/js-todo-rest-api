@@ -23,8 +23,9 @@ module.exports = {
   },
   deleteGroup: (data, callBack) => {
     pool.query(
-      `DELETE FROM tasks_group WHERE id = ? AND user_id = ?`,
-      [data.groupId, data.userId],
+      `DELETE FROM task WHERE group_id = ?;
+      DELETE FROM tasks_group WHERE id = ? AND user_id = ?;`,
+      [data.groupId, data.groupId, data.userId],
       (error, results) => {
         if (error) return callBack(error);
         return callBack(null, results);

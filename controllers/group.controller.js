@@ -63,7 +63,7 @@ module.exports = {
           message: "Something went wrong",
         });
       }
-      if (results.affectedRows === 0)
+      if (results[1].affectedRows === 0)
         return res.json({ success: false, message: "Group not found" });
       return res.json({
         success: true,
