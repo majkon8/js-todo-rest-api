@@ -4,6 +4,7 @@ const {
   deleteTask,
   getTask,
   toggleTaskDone,
+  toggleTaskImportant,
 } = require("../services/task.service");
 
 module.exports = {
@@ -77,6 +78,23 @@ module.exports = {
     const userId = req.decodedToken.user.id;
     data.userId = userId;
     toggleTaskDone(data, (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.json({
+          success: false,
+          message: "Something went wrong",
+        });
+      }
+      if (results.affectedRows === 0)
+        return res.json({ success: false, message: "Task not found" });
+      return res.json({ success: true, message: "Task updated successfully" });
+    });
+  },
+  toggleTaskImportant: (req, res) => {
+    const data = req.body;
+    const userId = req.decodedToken.user.id;
+    data.userId = userId;
+    toggleTaskImportant(data, (error, results) => {
       if (error) {
         console.error(error);
         return res.json({

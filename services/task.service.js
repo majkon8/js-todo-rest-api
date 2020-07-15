@@ -13,7 +13,7 @@ module.exports = {
   },
   getAllTasksForUser: (userId, callBack) => {
     pool.query(
-      `SELECT id, body, created_at, group_id, done FROM task WHERE user_id = ?`,
+      `SELECT id, body, created_at, group_id, done, important FROM task WHERE user_id = ?`,
       [userId],
       (error, results) => {
         if (error) return callBack(error);
@@ -33,7 +33,7 @@ module.exports = {
   },
   getTask: (data, callBack) => {
     pool.query(
-      `SELECT body, created_at, group_id, done FROM task WHERE id = ? AND user_id = ?`,
+      `SELECT body, created_at, group_id, done, important FROM task WHERE id = ? AND user_id = ?`,
       [data.createdTaskId, data.userId],
       (error, results) => {
         if (error) return callBack(error);
@@ -45,6 +45,16 @@ module.exports = {
     pool.query(
       `UPDATE task SET done = ? WHERE id = ? AND user_id = ?`,
       [data.done, data.taskId, data.userId],
+      (error, results) => {
+        if (error) return callBack(error);
+        return callBack(null, results);
+      }
+    );
+  },
+  toggleTaskImportant: (data, callBack) => {
+    pool.query(
+      `UPDATE task SET important = ? WHERE id = ? AND user_id = ?`,
+      [data.important, data.taskId, data.userId],
       (error, results) => {
         if (error) return callBack(error);
         return callBack(null, results);

@@ -47,7 +47,7 @@ describe("Task routes", () => {
           response.body.should.have
             .property("createdTask")
             .and.to.be.an("object");
-          Object.keys(response.body.createdTask).length.should.be.eq(5);
+          Object.keys(response.body.createdTask).length.should.be.eq(6);
           done();
         });
     });
@@ -69,12 +69,12 @@ describe("Task routes", () => {
         });
     });
   });
-  describe("PATCH api/tasks/", () => {
-    it("It should update previously added task", (done) => {
+  describe("PATCH api/tasks/done", () => {
+    it("It should update done field in previously added task", (done) => {
       const body = { taskId: insertedId, done: true };
       chai
         .request(server)
-        .patch("/api/tasks/")
+        .patch("/api/tasks/done")
         .set("Authorization", `Bearer ${accessToken}`)
         .send(body)
         .end((error, response) => {
@@ -92,7 +92,43 @@ describe("Task routes", () => {
       const body = { taskId: 0, done: true };
       chai
         .request(server)
-        .patch("/api/tasks/")
+        .patch("/api/tasks/done")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send(body)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("object");
+          Object.keys(response.body).length.should.be.eq(2);
+          response.body.should.have.property("success").eq(false);
+          response.body.should.have.property("message").eq("Task not found");
+          done();
+        });
+    });
+  });
+  describe("PATCH api/tasks/important", () => {
+    it("It should update important field in previously added task", (done) => {
+      const body = { taskId: insertedId, important: true };
+      chai
+        .request(server)
+        .patch("/api/tasks/important")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send(body)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("object");
+          Object.keys(response.body).length.should.be.eq(2);
+          response.body.should.have.property("success").eq(true);
+          response.body.should.have
+            .property("message")
+            .eq("Task updated successfully");
+          done();
+        });
+    });
+    it("It should give an error 'Task not found'", (done) => {
+      const body = { taskId: 0, done: true };
+      chai
+        .request(server)
+        .patch("/api/tasks/important")
         .set("Authorization", `Bearer ${accessToken}`)
         .send(body)
         .end((error, response) => {
