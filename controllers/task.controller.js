@@ -2,16 +2,16 @@ const {
   createTask,
   getAllTasksForUser,
   deleteTask,
+  getTask,
+  toggleTaskDone,
 } = require("../services/task.service");
 
 module.exports = {
   createTask: (req, res) => {
-    const body = req.body;
+    const data = req.body;
     const userId = req.decodedToken.user.id;
-    body.userId = userId;
-    // If there is no group of tasks set, then set it to null
-    !body.group && (body.group = null);
-    createTask(body, (error, results) => {
+    data.userId = userId;
+    createTask(data, (error, results) => {
       if (error) {
         console.error(error);
         return res.json({
@@ -19,10 +19,23 @@ module.exports = {
           message: "Something went wrong",
         });
       }
-      return res.json({
-        success: true,
-        data: results,
-        message: "Task created successfully",
+      const resultsToSend = results;
+      const createdTaskId = results.insertId;
+      const data = { userId, createdTaskId };
+      getTask(data, (error, results) => {
+        if (error) {
+          console.error(error);
+          return res.json({
+            success: false,
+            message: "Something went wrong",
+          });
+        }
+        return res.json({
+          success: true,
+          data: resultsToSend,
+          message: "Task created successfully",
+          createdTask: { id: createdTaskId, ...results[0] },
+        });
       });
     });
   },
@@ -41,7 +54,9 @@ module.exports = {
   },
   deleteTask: (req, res) => {
     const taskId = req.body.taskId;
-    deleteTask(taskId, (error, results) => {
+    const userId = req.decodedToken.user.id;
+    const data = { taskId, userId };
+    deleteTask(data, (error, results) => {
       if (error) {
         console.error(error);
         return res.json({
@@ -55,6 +70,23 @@ module.exports = {
         success: true,
         message: "Task deleted successfully",
       });
+    });
+  },
+  toggleTaskDone: (req, res) => {
+    const data = req.body;
+    const userId = req.decodedToken.user.id;
+    data.userId = userId;
+    toggleTaskDone(data, (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.json({
+          success: false,
+          message: "Something went wrong",
+        });
+      }
+      if (results.affectedRows === 0)
+        return res.json({ success: false, message: "Task not found" });
+      return res.json({ success: true, message: "Task updated successfully" });
     });
   },
 };

@@ -38,12 +38,16 @@ describe("Task routes", () => {
           insertedId = response.body.data.insertId;
           response.should.have.status(200);
           response.body.should.be.an("object");
-          Object.keys(response.body).length.should.be.eq(3);
+          Object.keys(response.body).length.should.be.eq(4);
           response.body.should.have.property("success").eq(true);
           response.body.should.have.property("data").and.to.be.an("object");
           response.body.should.have
             .property("message")
             .eq("Task created successfully");
+          response.body.should.have
+            .property("createdTask")
+            .and.to.be.an("object");
+          Object.keys(response.body.createdTask).length.should.be.eq(5);
           done();
         });
     });
@@ -61,6 +65,42 @@ describe("Task routes", () => {
           Object.keys(response.body).length.should.be.eq(2);
           response.body.should.have.property("success").eq(true);
           response.body.should.have.property("data").and.to.be.an("array");
+          done();
+        });
+    });
+  });
+  describe("PATCH api/tasks/", () => {
+    it("It should update previously added task", (done) => {
+      const body = { taskId: insertedId, done: true };
+      chai
+        .request(server)
+        .patch("/api/tasks/")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send(body)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("object");
+          Object.keys(response.body).length.should.be.eq(2);
+          response.body.should.have.property("success").eq(true);
+          response.body.should.have
+            .property("message")
+            .eq("Task updated successfully");
+          done();
+        });
+    });
+    it("It should give an error 'Task not found'", (done) => {
+      const body = { taskId: 0, done: true };
+      chai
+        .request(server)
+        .patch("/api/tasks/")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send(body)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("object");
+          Object.keys(response.body).length.should.be.eq(2);
+          response.body.should.have.property("success").eq(false);
+          response.body.should.have.property("message").eq("Task not found");
           done();
         });
     });
