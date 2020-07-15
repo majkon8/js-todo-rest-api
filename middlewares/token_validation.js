@@ -8,12 +8,12 @@ module.exports = {
       const token = authHeader.slice(7);
       verify(token, process.env.JWT_KEY, (error, decodedToken) => {
         if (error)
-          return res.json({ success: false, message: "Invalid token" });
+          return res.status(401).json({ success: false, message: "Invalid token" });
         req.decodedToken = decodedToken;
         next();
       });
     } else {
-      return res.json({
+      return res.status(401).json({
         success: false,
         message: "Access denied - unauthorized user",
       });

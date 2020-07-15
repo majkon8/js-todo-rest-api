@@ -1,4 +1,8 @@
-const { createUser, getUserByEmail } = require("../services/user.service");
+const {
+  createUser,
+  getUserByEmail,
+  findRefreshToken,
+} = require("../services/user.service");
 const { hashSync, compareSync } = require("bcrypt-nodejs");
 const { sign } = require("jsonwebtoken");
 const { validateNewUserData } = require("../validators/index");
@@ -11,6 +15,11 @@ module.exports = {
     if (errors.length > 0)
       return res.json({ success: false, message: errors[0] });
     body.password = hashSync(body.password);
+    const user = { ...body };
+    // Make password = null to not include the password in refresh token
+    user.password = null;
+    const refreshToken = sign({ user }, process.env.JWT_KEY);
+    body.refreshToken = refreshToken;
     createUser(body, (error, results) => {
       if (error) {
         console.error(error);
@@ -47,12 +56,42 @@ module.exports = {
       const passwordIsValid = compareSync(body.password, results.password);
       if (!passwordIsValid)
         return res.json({ success: false, message: "Wrong password" });
-      // Make password = null to not include the password in jsontoken
+      // Make password = null to not include the password in access token
       results.password = null;
-      const jsontoken = sign({ user: results }, process.env.JWT_KEY, {
-        expiresIn: "1h",
+      const accessToken = sign({ user: results }, process.env.JWT_KEY, {
+        expiresIn: "10m",
       });
-      return res.json({ success: true, data: jsontoken });
+      return res.json({
+        success: true,
+        data: { accessToken, refreshToken: results.refresh_token },
+      });
+    });
+  },
+  refreshAccessToken: (req, res) => {
+    const refreshToken = req.get("Refresh");
+    if (!refreshToken)
+      return res.json({ success: false, message: "No refresh token provided" });
+    findRefreshToken(refreshToken, (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.json({
+          success: false,
+          message: "Something went wrong",
+        });
+      }
+      if (!results)
+        return res.json({
+          success: false,
+          message: "Refresh token not found",
+        });
+      const accessToken = sign({ user: results }, process.env.JWT_KEY, {
+        expiresIn: "10m",
+      });
+      return res.json({
+        success: true,
+        data: accessToken,
+        message: "Access token refreshed",
+      });
     });
   },
 };

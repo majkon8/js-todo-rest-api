@@ -7,6 +7,8 @@ const {
 module.exports = {
   createTask: (req, res) => {
     const body = req.body;
+    const userId = req.decodedToken.user.id;
+    body.userId = userId;
     // If there is no group of tasks set, then set it to null
     !body.group && (body.group = null);
     createTask(body, (error, results) => {

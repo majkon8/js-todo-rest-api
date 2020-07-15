@@ -20,15 +20,13 @@ describe("Task routes", () => {
       .post("/api/users/login")
       .send(user)
       .end((error, response) => {
-        accessToken = response.body.data;
+        accessToken = response.body.data.accessToken;
         done();
       });
   });
-  describe("POST api/users/", () => {
+  describe("POST api/tasks/", () => {
     it("It should create new task", (done) => {
       const task = {
-        // test@test.com user have id 23
-        userId: 23,
         body: "Test task",
       };
       chai
@@ -50,7 +48,7 @@ describe("Task routes", () => {
         });
     });
   });
-  describe("GET api/users/", () => {
+  describe("GET api/tasks/", () => {
     it("It should get user's tasks", (done) => {
       chai
         .request(server)
@@ -67,7 +65,7 @@ describe("Task routes", () => {
         });
     });
   });
-  describe("DELETE api/users/", () => {
+  describe("DELETE api/tasks/", () => {
     it("It should delete previously added task", (done) => {
       const body = { taskId: insertedId };
       chai
@@ -110,7 +108,7 @@ describe("Task routes", () => {
         .send()
         .end((error, response) => {
           console.log(response.body);
-          response.should.have.status(200);
+          response.should.have.status(401);
           response.body.should.be.an("object");
           Object.keys(response.body).length.should.be.eq(2);
           response.body.should.have.property("success").eq(false);
@@ -127,7 +125,7 @@ describe("Task routes", () => {
         .send()
         .set("Authorization", `Bearer token`)
         .end((error, response) => {
-          response.should.have.status(200);
+          response.should.have.status(401);
           response.body.should.be.an("object");
           Object.keys(response.body).length.should.be.eq(2);
           response.body.should.have.property("success").eq(false);
